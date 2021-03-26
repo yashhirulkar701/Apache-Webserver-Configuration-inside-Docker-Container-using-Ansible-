@@ -1,0 +1,44 @@
+- hosts: all
+  tasks:
+  - name: Add Docker Repository
+    shell:
+        cmd: "dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo "
+
+  - name: Installing Docker Package
+    package:
+       name: "docker-ce"
+       state: present
+
+  - name: Starting Docker Service
+    service:
+       name: "docker"
+       state: started
+
+  - name: Install Docker Module for Python
+    pip:
+       name: docker
+
+  - name: pull docker image
+    docker_image:
+           name: "httpd"
+           source: pull
+
+  - name: Making a directory on managed node
+    file:
+          path: "/root/a_ws1"
+          state: directory
+
+  - name: Copying webpage to managed node directory
+    copy:
+          src: "index.html"
+          dest: "/root/a_ws1"
+
+  - name: Create a docker container
+    docker_container:
+          name: "my_os"
+          image: "httpd"
+          volumes:
+               - "/root/a_ws1:/usr/local/apache2/htdocs/"
+          ports:
+               - "8080:80"
+          state: started
